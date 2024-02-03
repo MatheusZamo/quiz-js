@@ -3,30 +3,45 @@ const div = document.querySelector('.header')
 const h2 = document.createElement('h2')
 const correctAnswers = ['B','B','A','B','A']
 
-const handleSubmit = event => {
-  event.preventDefault()
-  h2.classList.add('score')
-  div.insertAdjacentElement('beforeend',h2)
-  let score = 0
-  let counter = 0
+let score = 0
 
-  let userAnswers = [
-    form.inputQuestion1,
-    form.inputQuestion2,
-    form.inputQuestion3,
-    form.inputQuestion4,
-    form.inputQuestion5,
-  ]
-  
-  const addScore = (answer,index) => {
-    if(answer.value === correctAnswers[index]){
+const getUserAnswers = () => {
+  let userAnswers = []
+
+  correctAnswers.forEach((_,index) => {
+    const userAnswer = form[`inputQuestion${index + 1}`]
+    userAnswers.push(userAnswer)
+  })
+
+  return userAnswers
+}
+
+const calculateUserScore = (userAnswers) => {
+  score = 0
+
+  userAnswers.forEach((answer,index) => {
+    const isUserAnswerCorrect = answer.value === correctAnswers[index]
+    if(isUserAnswerCorrect){
       score += 20
     }
-  }
+  })
+}
+
+const showFinalScore = () => {
+  h2.classList.add('score')
+  div.insertAdjacentElement('beforeend',h2)
+  scrollTo({
+    top:0,
+    left:0,
+    behavior:'smooth'
+  })
+}
+const animateFinalScore = () => {
+  let counter = 0
 
   const addBackground = color => h2.style.background = color
- 
-  const funcInterval = () => {
+  
+  const timer = setInterval(() => {
     if(counter === score){
       clearInterval(timer)
     }
@@ -40,18 +55,27 @@ const handleSubmit = event => {
     }
     
     h2.innerHTML= `Você acertou <span class='porcentage'>${counter}%</span> do quiz!`
-    counter++
-  }
-  
-  userAnswers.forEach(addScore)
-  scrollTo(0,0)
-  const timer = setInterval(funcInterval,30)
+    ++counter
+  },30)
+}
 
+const clearForm = (userAnswers) => {
   for(let i = 0;i < userAnswers.length;i++){
     for(let x = 0;x < userAnswers[i].length;x++){
       userAnswers[i][x].checked = false
     }
   }
+}
+
+const handleSubmit = event => {
+  event.preventDefault()
+
+  const userAnswers = getUserAnswers()
+  
+  calculateUserScore(userAnswers)
+  showFinalScore()
+  animateFinalScore()
+  clearForm(userAnswers)
 }
 
 form.addEventListener('submit', handleSubmit)
